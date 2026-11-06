@@ -127,6 +127,41 @@ This directory contains R and shell scripts for analyzing and visualizing phenot
 **Output Files:**
 - `data/haplo_frq/<population>.tsv` — Table of haplotype frequency estimates (population, chr, pos, NSNPs, frequencies) for the given population
 
+### `mito_consensus.sh`
+
+**Description:** Slurm batch script that builds mitochondrial consensus sequences from the pool-seq BAMs, aligns them with reference mtDNA sequences, and runs `mito_translate.R` to count amino acid differences between samples. Run from the project root: `sbatch scripts/mito_consensus.sh`.
+
+**Method:** Calls a majority-base consensus of the mitochondrial chromosome for each `*.sorted.bam` with `samtools consensus` (positions with depth < 10 become N). The consensus sequences are combined with the *D. melanogaster* BDGP6.32 mtDNA, the two extra mtDNA references (`SRR1663530_mito.fa`, `SRR1663606_mito.fa`) and *D. yakuba* NC_001322.1 (all in `data/`), and aligned with MAFFT. The BAMs, reference genome fasta, and Ensembl release 104 GTF are too large to include; the paths at the top of the script are placeholders and must be pointed at your own copies.
+
+**Output Files:**
+- `output/mito/consensus/<sample>.fa` — Per-sample mitochondrial consensus sequence
+- `output/mito/mito_all_unaligned.fa` — All mtDNA sequences before alignment
+- `output/mito/mito_aligned.fa` — MAFFT multiple sequence alignment
+- Plus the outputs of `mito_translate.R` (below), written to `output/mito/`
+
+### `mito_translate.R`
+
+**Description:** Translates the mitochondrial protein-coding genes in the mtDNA alignment and counts amino acid differences between sequences. Called by `mito_consensus.sh`.
+
+**Method:** Maps the reference GTF CDS coordinates through the alignment and translates every sequence with the Drosophila mitochondrial genetic code (NCBI table 5, alternative start codons read as Met). In-frame insertions and fully deleted codons relative to the reference count as differences; codons with N or frameshift gaps are ignored. The translated *D. yakuba* proteins match the NCBI proteins in `data/yakMTDNA_prot.faa`, except ND1, which is truncated at the *D. melanogaster* stop codon.
+
+**Usage:** `Rscript scripts/mito_translate.R <msa.fa> <gtf> <chrom> <ref_name> <out_dir>`
+
+**Output Files:**
+- `output/mito/protein_<gene>.fa` — Per-gene protein sequences for every sample
+- `output/mito/aa_diff_matrix_<gene>.csv` — Pairwise amino acid difference matrix for each gene
+- `output/mito/aa_diff_vs_ref_by_gene.csv` — Amino acid differences vs. the reference, samples by genes
+- `output/mito/aa_substitutions_vs_ref.csv` — Every amino acid substitution relative to the reference
+
+### `aa_diff_table.R`
+
+**Description:** Makes a LaTeX table of the amino acid differences from the reference by mitochondrial gene, from the `mito_translate.R` summary table. The B, Y, and Z population samples are largely duplicated rows, so only one representative sample is kept for each.
+
+**Method:** Reads `data/aa_diff_vs_ref_by_gene.csv` and, for each of the B, Y, and Z prefixes, keeps the first sample carrying that prefix's most common difference profile (a few low-coverage samples differ from their group's profile and are not shown). The reference and founder mtDNA rows are kept. The table is formatted with `kable` using booktabs.
+
+**Output Files:**
+- `output/aa_diff_table.tex` — LaTeX table of amino acid differences by gene
+
 ## Running the Scripts
 
 To run these scripts from the project root, open the `RRpopCage.Rproj` file in RStudio to set the working directory correctly, then:
@@ -158,4 +193,4 @@ The R scripts require the following packages:
 
 - `limSolve` — constrained least-squares regression (haplo_frqs.R only)
 
-`join_vcfSync.sh`, `glm.sh`, and `haplo_frqs.sh` are Slurm batch scripts; `join_vcfSync.sh` requires `bcftools`, `glm.sh` requires `poolFreqDiff` (py27 conda environment) and R, `haplo_frqs.sh` requires R.
+`join_vcfSync.sh`, `glm.sh`, `haplo_frqs.sh`, and `mito_consensus.sh` are Slurm batch scripts; `mito_consensus.sh` requires `samtools` (>= 1.16) and `mafft`, and calls `mito_translate.R` (base R only); `join_vcfSync.sh` requires `bcftools`, `glm.sh` requires `poolFreqDiff` (py27 conda environment) and R, `haplo_frqs.sh` requires R.
