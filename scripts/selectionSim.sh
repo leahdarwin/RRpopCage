@@ -24,12 +24,14 @@
 #SBATCH -o selectionSim_%A_%a.out
 #SBATCH -e selectionSim_%A_%a.err
 
+##cluster specific module loads
+module load r/4.5.1-iikl
+
 S_VALUES=(0 0.001 0.005 0.01 0.02 0.05 0.1 0.2 0.3 0.5)
 N_SIMS=10000
 
-SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(pwd)}/scripts"
-OUT_DIR="${SLURM_SUBMIT_DIR:-$(pwd)}/output/selectionSim"
-mkdir -p "$OUT_DIR"
+SCRIPT_DIR="scripts/"
+OUT_DIR="output/selectionSim"
 
 S=${S_VALUES[$SLURM_ARRAY_TASK_ID]}
 

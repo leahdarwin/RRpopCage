@@ -1,8 +1,18 @@
-# =============================================================================
-# Diploid Wright-Fisher model with selection + two-stage pool-seq noise,
-# tested with the treatment x time GLM from poolFreqDiff_treatment_time_repl_RR.py
-# =============================================================================
+# ============================================================================
+# Script: Selection simulation (Wright-Fisher + pool-seq sampling + GLM)
 #
+# Description:
+#   Defines the simulator used for the selection power simulations: a diploid
+#   Wright-Fisher model with selection followed by two-stage pool-seq sampling,
+#   tested with the treatment x time GLM from
+#   poolFreqDiff_treatment_time_repl_RR.py. Sourced by run_selectionSim.R; can
+#   also be run directly for a single example simulation.
+#
+# Author: Leah Darwin
+# ============================================================================
+#
+# Model details
+# -------------
 # One biallelic locus, one selection coefficient `s` per run. Three populations
 # (treatments, as in the BEI/YAK/ZIM mito design): population 1 evolves with
 # selection coefficient s, populations 2 and 3 are identical and neutral

@@ -1,9 +1,16 @@
-# =============================================================================
-# Run selectionSim.R n_sims times for one selection coefficient and write the
-# treatment:time p-values to a csv.
+# ============================================================================
+# Script: Run selection simulations for one selection coefficient
+#
+# Description:
+#   Runs the simulator in selectionSim.R n_sims times for a single selection
+#   coefficient and writes the treatment x time GLM p-values (columns sim, s,
+#   p_value) to a csv. Called once per selection coefficient by
+#   selectionSim.sh.
 #
 # Usage: Rscript run_selectionSim.R <s> <n_sims> <out_csv> [seed]
-# =============================================================================
+#
+# Author: Leah Darwin
+# ============================================================================
 
 args   <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 3) stop("Usage: Rscript run_selectionSim.R <s> <n_sims> <out_csv> [seed]")
@@ -19,7 +26,7 @@ source(file.path(script_dir, "selectionSim.R"))
 set.seed(seed)
 p_values <- vapply(seq_len(n_sims), function(i) {
   simulate_wf_poolseq(
-    N           = 5000,
+    N           = 2150,
     s           = s,
     h           = 0.5,
     n_gens      = 25,
